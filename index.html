@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tratado Interativo de Evangelização Reformada</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The application is structured as a single-page app with a fixed sidebar for navigation and a dynamic main content area. This avoids a long, intimidating scroll through the dense theological text. The 11 sections of the source report were synthesized and reorganized into four more intuitive, user-centric themes: 1) O Fundamento (Why we evangelize), 2) A Mensagem (What we say), 3) A Prática (How we do it), and 4) O Evangelista (Who does it). This thematic structure allows users to explore concepts based on their questions rather than the report's linear order. The user flow begins at the "Fundamento" section, with constant access to other themes via the sidebar, encouraging non-linear exploration. Interactive elements like clickable diagrams, steppers, and charts are used to break down complex information into digestible, user-initiated reveals, enhancing engagement and comprehension. -->
+    <!-- Visualization & Content Choices: The application translates abstract theological concepts into interactive elements without using SVG or raster images. For "O Fundamento," a clickable HTML/CSS grid visualizes the core doctrines, allowing users to explore each concept individually, making the dense text more manageable. Goal: Inform/Organize -> Viz: Interactive Grid -> Interaction: Click-to-reveal text -> Justification: Breaks down complex text, more engaging than a list. For "A Mensagem," an HTML/CSS stepper guides the user through the "Deus, Homem, Cristo, Resposta" framework. Goal: Organize/Inform -> Viz: Stepper -> Interaction: Click to progress -> Justification: Intuitive for process-based information. For "A Prática," a Chart.js polar area chart visually represents the "antimony" between Divine Sovereignty and Human Responsibility. Goal: Compare/Relationships -> Viz: Polar Area Chart -> Interaction: Hover for tooltips, click to update text -> Justification: Visually striking and effectively communicates the balance of two core ideas. For "O Evangelista," content is presented in clean cards and an expandable accordion for the bibliography. Goal: Inform/Organize -> Viz: Cards & Accordion -> Interaction: Click-to-expand -> Justification: Clean UI for presenting detailed list-based information. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF7;
+            color: #403D39;
+        }
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .nav-link.active {
+            background-color: #F0EBE3;
+            border-left-color: #B76D68;
+            color: #403D39;
+            font-weight: 600;
+        }
+        .nav-link:hover {
+            background-color: #F0EBE3;
+        }
+        .doctrinal-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid #E3DCD2;
+        }
+        .doctrinal-card:hover, .doctrinal-card.active {
+            border-color: #6B705C;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .gospel-tab {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        .gospel-tab:hover {
+            background-color: #F0EBE3;
+            border-left-color: #B76D68;
+        }
+        .gospel-tab.active {
+            color: #B76D68;
+            font-weight: 600;
+            border-left-color: #B76D68;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 350px;
+            width: 100%;
+            max-width: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+                max-width: 500px;
+            }
+        }
+        .book-entry {
+            border-bottom: 1px solid #E3DCD2;
+        }
+    </style>
+</head>
+<body class="antialiased flex flex-col min-h-screen">
+    <div class="flex flex-1">
+        <!-- Sidebar Navigation -->
+        <nav class="w-1/5 bg-[#F7F3EE] p-6 hidden md:block sticky top-0 h-screen">
+            <div class="mb-12">
+                <h1 class="text-2xl font-bold text-[#403D39]">Evangelização</h1>
+                <p class="text-sm text-[#6B705C]">Um Tratado Interativo</p>
+            </div>
+            <ul>
+                <li><a href="#fundamento" class="nav-link block p-4 mb-2 rounded-r-lg active">O Fundamento</a></li>
+                <li><a href="#mensagem" class="nav-link block p-4 mb-2 rounded-r-lg">A Mensagem</a></li>
+                <li><a href="#pratica" class="nav-link block p-4 mb-2 rounded-r-lg">A Prática</a></li>
+                <li><a href="#evangelista" class="nav-link block p-4 mb-2 rounded-r-lg">O Evangelista</a></li>
+            </ul>
+        </nav>
+
+        <!-- Mobile Navigation (Dropdown) -->
+        <div class="md:hidden fixed top-0 left-0 right-0 bg-[#F7F3EE] z-20 p-4 shadow-md">
+            <select id="mobile-nav" class="w-full p-2 border border-[#E3DCD2] rounded-md bg-white">
+                <option value="fundamento">O Fundamento</option>
+                <option value="mensagem">A Mensagem</option>
+                <option value="pratica">A Prática</option>
+                <option value="evangelista">O Evangelista</option>
+            </select>
+        </div>
+
+        <!-- Main Content -->
+        <main class="w-full md:w-4/5 p-6 sm:p-8 md:p-12 mt-16 md:mt-0">
+            <!-- Section 1: O Fundamento -->
+            <section id="fundamento" class="content-section">
+                <h2 class="text-4xl text-[#403D39] mb-4">O Fundamento Teológico</h2>
+                <p class="text-lg text-gray-600 mb-8 max-w-4xl">
+                    Esta seção explora o "porquê" da evangelização, mergulhando nos alicerces doutrinários que sustentam a missão da igreja na perspectiva reformada. Aqui, você pode interagir com os pressupostos teológicos essenciais, como a soberania de Deus e a eleição, para compreender como essas verdades não apenas fundamentam, mas impulsionam a proclamação do evangelho. O objetivo é estabelecer que a evangelização é uma consequência lógica e gloriosa de uma teologia centrada em Deus.
+                </p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div>
+                        <h3 class="text-2xl text-[#403D39] mb-4">As Doutrinas da Graça e a Missão</h3>
+                        <p class="mb-6 text-gray-600">Clique em cada doutrina para explorar seu impacto na evangelização.</p>
+                        <div id="doctrinal-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            <!-- Doctrinal cards will be injected by JS -->
+                        </div>
+                    </div>
+                    <div id="doctrinal-content" class="bg-white p-6 rounded-lg shadow-sm border border-[#E3DCD2] min-h-[300px]">
+                        <!-- Content will be injected by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: A Mensagem -->
+            <section id="mensagem" class="content-section hidden">
+                <h2 class="text-4xl text-[#403D39] mb-4">A Mensagem do Evangelho</h2>
+                <p class="text-lg text-gray-600 mb-8 max-w-4xl">
+                    O que exatamente devemos proclamar? Esta seção disseca o conteúdo da mensagem evangelística. Utilizando a estrutura "Deus, Homem, Cristo, Resposta", apresentamos os elementos inegociáveis do evangelho. A interatividade aqui permite que você navegue passo a passo por essa narrativa da redenção, compreendendo a lógica teológica que torna as boas-novas tão poderosas e transformadoras. O foco é a fidelidade ao conteúdo bíblico, que é o verdadeiro poder para a salvação.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div id="gospel-tabs" class="md:col-span-1 flex flex-col space-y-2">
+                        <!-- Gospel tabs will be injected by JS -->
+                    </div>
+                    <div id="gospel-content" class="md:col-span-3 bg-white p-6 rounded-lg shadow-sm border border-[#E3DCD2] min-h-[300px]">
+                        <!-- Content will be injected by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: A Prática -->
+            <section id="pratica" class="content-section hidden">
+                <h2 class="text-4xl text-[#403D39] mb-4">A Prática da Evangelização</h2>
+                 <p class="text-lg text-gray-600 mb-8 max-w-4xl">
+                    Como a soberania de Deus e a responsabilidade humana cooperam na evangelização? Esta seção aborda a dinâmica prática da missão, explorando a chamada "antinomia" — a união da ação divina e do esforço humano. A visualização de dados interativa ilustra como a dependência total de Deus (oração, confiança no Espírito) e o uso fiel dos meios (pregação, conduta) são duas metades inseparáveis de uma mesma verdade. O objetivo é equipá-lo com uma perspectiva equilibrada que evita tanto a passividade quanto o pragmatismo.
+                </p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div class="chart-container">
+                        <canvas id="antimonyChart"></canvas>
+                    </div>
+                    <div id="antimony-content" class="bg-white p-6 rounded-lg shadow-sm border border-[#E3DCD2] min-h-[300px]">
+                         <!-- Content will be injected by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: O Evangelista -->
+            <section id="evangelista" class="content-section hidden">
+                <h2 class="text-4xl text-[#403D39] mb-4">O Perfil do Evangelista</h2>
+                <p class="text-lg text-gray-600 mb-8 max-w-4xl">
+                    Quem é chamado para esta tarefa e como deve viver? A seção final foca no mensageiro. Exploramos as virtudes essenciais — integridade, humildade e amor — que devem caracterizar a vida daquele que proclama o evangelho. Além disso, fornecemos uma bibliografia comentada e interativa com obras fundamentais para o aprofundamento contínuo. O propósito é reforçar que a mensagem é inseparável da vida do mensageiro e oferecer caminhos para o crescimento teológico e prático.
+                </p>
+
+                <div class="mb-12">
+                    <h3 class="text-2xl text-[#403D39] mb-4">Caráter e Conduta</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow-sm border border-[#E3DCD2]">
+                            <h4 class="text-xl font-bold text-[#6B705C] mb-2">Integridade e Santidade</h4>
+                            <p class="text-gray-600">Uma vida que adorna a doutrina, onde a crença, a pregação e a conduta estão em harmonia, refletindo o poder transformador do evangelho.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-sm border border-[#E3DCD2]">
+                            <h4 class="text-xl font-bold text-[#6B705C] mb-2">Humildade e Mansidão</h4>
+                            <p class="text-gray-600">O reconhecimento da total dependência da graça de Deus, que protege contra o orgulho e foca toda a glória Nele.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-sm border border-[#E3DCD2]">
+                            <h4 class="text-xl font-bold text-[#6B705C] mb-2">Amor pelas Almas</h4>
+                            <p class="text-gray-600">A compaixão sacrificial que reflete o amor de Cristo, impulsionando a perseverança em meio à rejeição e ao custo pessoal.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl text-[#403D39] mb-4">Bibliografia para Aprofundamento</h3>
+                    <div id="bibliography-list" class="bg-white rounded-lg shadow-sm border border-[#E3DCD2]">
+                        <!-- Bibliography will be injected by JS -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <footer class="text-center p-4 text-sm text-gray-500 bg-[#F7F3EE]">
+        Desenvolvido por Rodrigo Niskier e Gemini
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const data = {
+        doctrines: [
+            { id: 'soberania', title: 'Soberania de Deus', content: 'A doutrina de que Deus reina com controle absoluto sobre toda a criação, predeterminando todos os eventos para Seus próprios fins gloriosos, é a rocha sobre a qual o evangelista se firma. Em um mundo de caos, oposição e corações endurecidos, a certeza de que Deus está no trono, executando Seu plano infalível, dá ao mensageiro uma confiança que nenhuma estratégia humana pode oferecer. A missão não depende do poder do evangelista, mas do poder do Deus soberano que o envia.' },
+            { id: 'eleicao', title: 'Eleição Incondicional', content: 'A doutrina de que Deus, desde a eternidade e por Sua pura graça, escolheu um povo para Si, não com base em mérito ou fé prevista, mas segundo o beneplácito de Sua vontade (Efésios 1:4-6), é uma das verdades mais encorajadoras para a evangelização. A eleição não nos diz a quem pregar, mas nos dá a certeza absoluta de que nossa pregação não será em vão. Em cada povo, Deus tem Seus eleitos, e o evangelho é o meio que Ele usará para chamá-los.' },
+            { id: 'depravacao', title: 'Depravação Total', content: 'O homem em seu estado natural está espiritualmente morto, cego para a verdade e hostil a Deus (Efésios 2:1-3). Ele não buscará a Deus por iniciativa própria. Esta doutrina radical da incapacidade humana destrói qualquer confiança em nossa própria eloquência ou técnicas de marketing. Ela nos força a cair de joelhos em oração, reconhecendo que somente um ato sobrenatural de Deus, a regeneração, pode dar vida a um coração morto.' },
+            { id: 'expiacao', title: 'Expiação Definida', content: 'A morte de Cristo não foi um mero gesto que tornou a salvação possível para todos, mas um ato redentor eficaz que realmente assegurou e garantiu a salvação de todos aqueles que o Pai Lhe deu (João 10:15, 27-29). Cristo não morreu para tentar salvar, Ele morreu para salvar. Anunciamos uma salvação consumada, não uma salvação potencial. Isso dá uma confiança imensa ao proclamar a obra perfeitamente bem-sucedida da cruz.' },
+            { id: 'graca', title: 'Graça Irresistível', content: 'Esta doutrina é o corolário da depravação total. Se o homem é incapaz de vir a Deus, Deus deve agir soberanamente para trazê-lo. O Espírito Santo, ao aplicar a Palavra pregada ao coração do eleito, o regenera, concede-lhe um novo coração, e o atrai infalivelmente a Cristo, dando-lhe os dons da fé e do arrependimento. Esta verdade liberta o evangelista do fardo de "produzir conversões". Nossa responsabilidade é plantar e regar; Deus soberanamente dá o crescimento.' },
+             { id: 'proposito', title: 'O Propósito Final', content: 'O propósito primário da evangelização é glorificar a Deus. A salvação dos pecadores não é o fim último; é um meio glorioso para um fim ainda mais glorioso: o louvor da glória da graça de Deus (Efésios 1:6, 12, 14). Uma paixão pela glória de Deus é o combustível mais puro e duradouro para a obra missionária. De forma secundária, o propósito é alcançar os eleitos de Deus, chamando-os ao arrependimento e à fé.' },
+        ],
+        gospel: [
+            { id: 'deus', title: 'Deus', content: 'A apresentação começa com o caráter de Deus. Ele é o Criador de todas as coisas (Gênesis 1:1), perfeitamente santo (1 João 1:5) e justo. Ele é o Rei digno de toda adoração e, por Sua própria natureza, deve punir a rebelião (Romanos 2:5-8). O evangelho não começa com o homem, mas com a majestade de Deus, contra quem todo pecado é cometido.' },
+            { id: 'homem', title: 'Homem', content: 'A seguir, a condição humana é explicada. Todas as pessoas, embora criadas à imagem de Deus, pecaram e se rebelaram contra Ele (Romanos 3:23). Por causa da queda de Adão, todos nascem com uma natureza pecaminosa, espiritualmente mortos, separados de Deus e sob a justa condenação da Sua ira (Efésios 2:1-3). O homem é incapaz de se salvar.' },
+            { id: 'cristo', title: 'Cristo', content: 'Tendo estabelecido o problema, a solução é apresentada. Jesus Cristo, o eterno Filho de Deus, tornou-se plenamente homem (João 1:14). Ele viveu uma vida perfeita e morreu na cruz como um substituto penal, recebendo a ira de Deus que nós merecíamos (2 Coríntios 5:21). Ao terceiro dia, ressuscitou, provando Sua vitória sobre o pecado e a morte, garantindo vida eterna para todo o Seu povo (1 Coríntios 15:20-22).' },
+            { id: 'resposta', title: 'Resposta', content: 'Finalmente, a mensagem culmina em um chamado a uma resposta pessoal. Deus ordena que todas as pessoas, em todos os lugares, se arrependam de seus pecados (uma mudança de mente que leva a uma mudança de vida) e coloquem sua fé (confiança e submissão) exclusivamente em Jesus Cristo como Salvador e Senhor para a salvação (Marcos 1:15; Romanos 10:9-10).' }
+        ],
+        antimony: {
+            'soberania': { title: 'Soberania Divina', content: 'Deus é o Agente soberano na evangelização. A salvação pertence ao Senhor. O Espírito Santo convence do pecado, da justiça e do juízo (João 16:8-11). A eleição garante que a pregação não será em vão, e a graça de Deus é o poder eficaz que regenera o coração do pecador. Nossa confiança final não está nos métodos, mas no Deus que dá o crescimento.' },
+            'responsabilidade': { title: 'Responsabilidade Humana', content: 'Deus soberanamente ordena o uso de meios. Temos a responsabilidade sagrada de evangelizar. Isso inclui a oração como trabalho primário, a proclamação fiel da Palavra, uma conduta piedosa que adorna o evangelho e o uso sábio da apologética para defender a fé. Nossa tarefa é a fidelidade no uso desses meios.' }
+        },
+        bibliography: [
+            { title: 'Packer, J.I., Evangelização e a Soberania de Deus', content: 'Um clássico moderno indispensável. Packer resolve a falsa dicotomia entre a soberania de Deus e a responsabilidade evangelística, argumentando de forma convincente que a crença na soberania divina não apenas permite, mas fortalece e sustenta a evangelização. Sua discussão sobre a "antinomia" é uma das mais claras e pastoralmente úteis já escritas sobre o tema.', link: 'https://www.editorafiel.com.br/evangelizacao-e-a-soberania-de-deus' },
+            { title: 'Dever, Mark, O Evangelho e a Evangelização Pessoal', content: 'A força deste livro está em sua clareza e praticidade, firmemente enraizadas em uma teologia robusta. Dever responde a perguntas cruciais: O que é o evangelho? Quem deve evangelizar? Como? Sua estrutura "Deus, Homem, Cristo, Resposta" tornou-se uma ferramenta padrão para apresentar o evangelho de forma completa e teocêntrica.', link: 'https://www.editorafiel.com.br/o-evangelho-e-a-evangelizacao-mark-dever' },
+            { title: 'Piper, John, Alegrem-se os Povos: A Supremacia de Deus em Missões', content: 'Esta é talvez a mais importante obra contemporânea sobre a teologia da missão. A tese de Piper de que "missões existem porque a adoração não existe" reorienta radicalmente todo o empreendimento missionário. Ele fundamenta a evangelização na paixão pela glória de Deus. A adoração se torna tanto o combustível quanto o alvo das missões.', link: 'https://www.editoraculturacrista.com.br/produto/alegrem-se-os-povos-916' },
+            { title: 'Sproul, R.C., O Que é Teologia Reformada?', content: 'Embora não seja um livro estritamente sobre evangelismo, a obra de Sproul fornece o fundamento teológico indispensável. Sua explicação clara e convincente das doutrinas da graça (TULIP) ajuda o leitor a compreender o "porquê" por trás da prática evangelística reformada.', link: 'https://www.editorafiel.com.br/o-que-e-teologia-reformada-serie' },
+            { title: 'Bahnsen, Greg L., Apologética Pressuposicional', content: 'Para aqueles que desejam se aprofundar na defesa da fé, a obra de Bahnsen é o padrão-ouro da apologética pressuposicional. Ele ensina o leitor a não ceder terreno neutro ao incrédulo, mas a demonstrar que toda a verdade, lógica e moralidade dependem do Deus da Escritura.', link: 'https://www.monergismo.com/livros/Apologetica/Apologetica-Pressuposicional_Greg-Bahnsen.pdf' }
+        ]
+    };
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileNav = document.getElementById('mobile-nav');
+    const contentSections = document.querySelectorAll('.content-section');
+
+    function navigateTo(sectionId) {
+        contentSections.forEach(section => {
+            section.classList.toggle('hidden', section.id !== sectionId);
+        });
+
+        navLinks.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === `#${sectionId}`);
+        });
+        
+        if(mobileNav.value !== sectionId) {
+            mobileNav.value = sectionId;
+        }
+    }
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const sectionId = e.currentTarget.getAttribute('href').substring(1);
+            navigateTo(sectionId);
+            window.scrollTo(0, 0);
+        });
+    });
+
+    mobileNav.addEventListener('change', (e) => {
+        navigateTo(e.target.value);
+        window.scrollTo(0, 0);
+    });
+
+    // Section 1: Fundamento
+    const doctrinalGrid = document.getElementById('doctrinal-grid');
+    const doctrinalContent = document.getElementById('doctrinal-content');
+    data.doctrines.forEach(doctrine => {
+        const card = document.createElement('div');
+        card.className = 'doctrinal-card p-4 rounded-lg bg-white text-center';
+        card.dataset.id = doctrine.id;
+        card.innerHTML = `<h4 class="font-semibold text-sm sm:text-base">${doctrine.title}</h4>`;
+        doctrinalGrid.appendChild(card);
+    });
+
+    const doctrinalCards = document.querySelectorAll('.doctrinal-card');
+    doctrinalGrid.addEventListener('click', e => {
+        const card = e.target.closest('.doctrinal-card');
+        if (card) {
+            const doctrineId = card.dataset.id;
+            const doctrine = data.doctrines.find(d => d.id === doctrineId);
+            doctrinalContent.innerHTML = `
+                <h3 class="text-2xl font-bold text-[#6B705C] mb-3">${doctrine.title}</h3>
+                <p class="text-gray-600 leading-relaxed">${doctrine.content}</p>
+            `;
+            doctrinalCards.forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+        }
+    });
+    doctrinalCards[0].click();
+
+    // Section 2: Mensagem (New Tabbed Interface)
+    const gospelTabsContainer = document.getElementById('gospel-tabs');
+    const gospelContent = document.getElementById('gospel-content');
+    data.gospel.forEach(step => {
+        const tab = document.createElement('button');
+        tab.className = 'gospel-tab text-left p-4 rounded-md text-gray-600';
+        tab.dataset.id = step.id;
+        tab.innerHTML = `<span class="text-lg">${step.title}</span>`;
+        gospelTabsContainer.appendChild(tab);
+    });
+
+    const gospelTabs = document.querySelectorAll('.gospel-tab');
+    gospelTabsContainer.addEventListener('click', e => {
+        const tab = e.target.closest('.gospel-tab');
+        if (tab) {
+            const stepId = tab.dataset.id;
+            const step = data.gospel.find(s => s.id === stepId);
+            gospelContent.innerHTML = `
+                <h3 class="text-2xl font-bold text-[#6B705C] mb-3">${step.title}</h3>
+                <p class="text-gray-600 leading-relaxed">${step.content}</p>
+            `;
+            gospelTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+        }
+    });
+    gospelTabs[0].click();
+
+    // Section 3: Prática
+    const antimonyContent = document.getElementById('antimony-content');
+    const ctx = document.getElementById('antimonyChart').getContext('2d');
+    const antimonyChart = new Chart(ctx, {
+        type: 'polarArea',
+        data: {
+            labels: ['Soberania Divina', 'Responsabilidade Humana'],
+            datasets: [{
+                data: [50, 50],
+                backgroundColor: [
+                    'rgba(107, 112, 92, 0.5)',
+                    'rgba(183, 109, 104, 0.5)'
+                ],
+                borderColor: [
+                    'rgba(107, 112, 92, 1)',
+                    'rgba(183, 109, 104, 1)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    display: false
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label;
+                        }
+                    }
+                }
+            },
+            onClick: (e, elements) => {
+                if (elements.length > 0) {
+                    const clickedIndex = elements[0].index;
+                    const id = clickedIndex === 0 ? 'soberania' : 'responsabilidade';
+                    const antimony = data.antimony[id];
+                    antimonyContent.innerHTML = `
+                        <h3 class="text-2xl font-bold text-[#6B705C] mb-3">${antimony.title}</h3>
+                        <p class="text-gray-600 leading-relaxed">${antimony.content}</p>
+                    `;
+                }
+            }
+        }
+    });
+    antimonyContent.innerHTML = `
+        <h3 class="text-2xl font-bold text-[#6B705C] mb-3">A Antinomia Divina</h3>
+        <p class="text-gray-600 leading-relaxed">Clique em uma seção do gráfico para explorar a relação entre a soberania de Deus e a responsabilidade humana na evangelização. Ambas são verdades bíblicas que devem ser mantidas em equilíbrio, formando o alicerce para uma prática evangelística fiel e confiante.</p>
+    `;
+
+    // Section 4: Evangelista
+    const bibliographyList = document.getElementById('bibliography-list');
+    data.bibliography.forEach(book => {
+        bibliographyList.innerHTML += `
+            <div class="book-entry p-4">
+                <details>
+                    <summary class="font-semibold text-lg text-[#403D39] cursor-pointer hover:text-[#B76D68]">${book.title}</summary>
+                    <div class="mt-4 pl-4 border-l-2 border-[#E3DCD2]">
+                        <p class="text-gray-600 mb-4">${book.content}</p>
+                        <a href="${book.link}" target="_blank" rel="noopener noreferrer" class="text-[#B76D68] hover:underline font-semibold">Saiba mais &rarr;</a>
+                    </div>
+                </details>
+            </div>
+        `;
+    });
+    
+    // Initial load
+    navigateTo('fundamento');
+});
+</script>
+</body>
+</html>
